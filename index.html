@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Usuario</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Crear Cuenta</h2>
+    <form id="form-usuario">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" required>
+
+      <label for="correo">Correo electrónico:</label>
+      <input type="email" id="correo" required>
+
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" required minlength="6">
+
+      <button type="submit">Registrarse</button>
+    </form>
+    <p id="respuesta"></p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

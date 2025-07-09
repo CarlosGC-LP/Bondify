@@ -1,0 +1,10 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar archivos .env
+.env
+
+# Opcional: Ignorar otros archivos (ej: logs, IDE)
+.DS_Store
+npm-debug.log
+.idea/

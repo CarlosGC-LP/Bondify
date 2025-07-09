@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bienvenido</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2 id="saludo"></h2>
+  </div>
+
+  <h3>Resumen de últimas simulaciones</h3>
+  <ul id="resumen-bonos"></ul>
+  <div id="historial"></div>
+  
+<script>
+  async function cargarBonos() {
+      const nombre = localStorage.getItem('nombreUsuario');
+  const idUsuario = localStorage.getItem('idUsuario'); // <- Asegúrate de guardar esto en login.js
+
+  document.getElementById('saludo').textContent = nombre ? `Bienvenido, ${nombre}` : 'Bienvenido';
+    const id = localStorage.getItem('idUsuario');
+    if (!id) return;
+
+    try {
+      const respuesta = await fetch(`http://localhost:3000/api/bonos/${id}`);
+      const bonos = await respuesta.json();
+
+      if (!Array.isArray(bonos)) {
+        throw new Error('La respuesta no es un arreglo');
+      }
+
+      const historial = document.getElementById('historial');
+      historial.innerHTML = '<h3>Resumen de últimas simulaciones</h3>';
+
+      bonos.forEach((bono, index) => {
+        const resumen = document.createElement('p');
+        resumen.textContent = `Bono #${index + 1} - Capital: S/ ${bono.valor_nominal} - Plazo: ${bono.anios} meses - Tasa: ${bono.tasa_nominal}%`;
+        historial.appendChild(resumen);
+      });
+    } catch (err) {
+      console.error('Error cargando bonos:', err);
+    }
+  }
+
+  window.onload = cargarBonos;
+
+  </script>
+</body>
+</html>
