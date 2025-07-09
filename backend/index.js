@@ -27,14 +27,12 @@ app.get('/api/bonos/:idUsuario', async (req, res) => {
         WHERE id_usuario = @idUsuario
       `);
 
-    res.status(200).json(result.recordset); // devolvemos un arreglo
+    res.status(200).json(result.recordset); 
   } catch (err) {
     console.error('Error al obtener bonos:', err);
     res.status(500).json({ error: 'Error al obtener bonos' });
   }
 });
-
-
 
 // Ruta para registrar usuario
 app.post('/api/usuarios', async (req, res) => {
@@ -54,7 +52,6 @@ app.post('/api/usuarios', async (req, res) => {
   }
 });
 
-// Ruta para login de usuario
 // Ruta para login de usuario
 app.post('/api/login', async (req, res) => {
   try {
@@ -76,10 +73,6 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
-
-
-
-
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
