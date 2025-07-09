@@ -7,4 +7,4 @@ node_modules/
 # Opcional: Ignorar otros archivos (ej: logs, IDE)
 .DS_Store
 npm-debug.log
-.idea/
+.idea/backend/.env
