@@ -74,6 +74,63 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Ruta para insertar nuevo bono
+app.post('/api/bonos', async (req, res) => {
+  try {
+    const {
+      id_usuario, id_moneda, id_tipos_tasa, id_frecuencias,
+      id_periodos_gracia, id_tipos_amortizacion, valor_nominal,
+      valor_comercial, anios, fecuencia_cupon, periodos_anio, dias_anio,
+      tipo_tasa, tasa_nominal, tasa_efectiva, fecuencia_capitalizacion,
+      impuesto_renta, fecha_emision, periodo_gracia,
+      inflacion_anual, inflacion_semestral, facha_bono
+    } = req.body;
+
+    const pool = await poolPromise;
+    await pool.request()
+      .input('id_usuario', sql.Int, id_usuario)
+      .input('id_moneda', sql.Int, id_moneda)
+      .input('id_tipos_tasa', sql.Int, id_tipos_tasa)
+      .input('id_frecuencias', sql.Int, id_frecuencias)
+      .input('id_periodos_gracia', sql.Int, id_periodos_gracia)
+      .input('id_tipos_amortizacion', sql.Int, id_tipos_amortizacion)
+      .input('valor_nominal', sql.Float, valor_nominal)
+      .input('valor_comercial', sql.Float, valor_comercial)
+      .input('anios', sql.Int, anios)
+      .input('fecuencia_cupon', sql.VarChar(50), fecuencia_cupon)
+      .input('periodos_anio', sql.Int, periodos_anio)
+      .input('dias_anio', sql.Int, dias_anio)
+      .input('tipo_tasa', sql.VarChar(50), tipo_tasa)
+      .input('tasa_nominal', sql.Float, tasa_nominal)
+      .input('tasa_efectiva', sql.Float, tasa_efectiva)
+      .input('fecuencia_capitalizacion', sql.VarChar(50), fecuencia_capitalizacion)
+      .input('impuesto_renta', sql.Float, impuesto_renta)
+      .input('fecha_emision', sql.DateTime, fecha_emision)
+      .input('periodo_gracia', sql.Bit, periodo_gracia)
+      .input('inflacion_anual', sql.Float, inflacion_anual)
+      .input('inflacion_semestral', sql.Float, inflacion_semestral)
+      .input('facha_bono', sql.DateTime, facha_bono)
+      .query(`INSERT INTO BONOS (
+        id_usuario, id_moneda, id_tipos_tasa, id_frecuencias, id_periodos_gracia, id_tipos_amortizacion,
+        valor_nominal, valor_comercial, anios, fecuencia_cupon, periodos_anio, dias_anio,
+        tipo_tasa, tasa_nominal, tasa_efectiva, fecuencia_capitalizacion, impuesto_renta,
+        fecha_emision, periodo_gracia, inflacion_anual, inflacion_semestral, facha_bono
+      ) VALUES (
+        @id_usuario, @id_moneda, @id_tipos_tasa, @id_frecuencias, @id_periodos_gracia, @id_tipos_amortizacion,
+        @valor_nominal, @valor_comercial, @anios, @fecuencia_cupon, @periodos_anio, @dias_anio,
+        @tipo_tasa, @tasa_nominal, @tasa_efectiva, @fecuencia_capitalizacion, @impuesto_renta,
+        @fecha_emision, @periodo_gracia, @inflacion_anual, @inflacion_semestral, @facha_bono
+      )`);
+
+    res.status(201).json({ mensaje: 'Bono guardado exitosamente' });
+  } catch (err) {
+    console.error('❌ Error al guardar bono:', err.message, err.stack);
+    res.status(500).json({ error: err.message });
+  }
+
+});
+
+
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
