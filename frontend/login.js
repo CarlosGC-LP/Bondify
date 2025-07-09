@@ -16,7 +16,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     if (respuesta.ok) {
       // Guardar nombre del usuario en localStorage
       localStorage.setItem('nombreUsuario', data.nombre);
-      localStorage.setItem('idUsuario', data.id); // <- Este ID lo usarás para filtrar los bonos
+      localStorage.setItem('idUsuario', data.id); 
 
       // Redirigir a la página de bienvenida
       window.location.href = 'bienvenido.html';
