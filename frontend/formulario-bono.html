@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Registrar Bono</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Registrar Nuevo Bono</h2>
+    <form id="form-bono">
+      <label for="valor_nominal">Valor Nominal (S/):</label>
+      <input type="number" id="valor_nominal" required>
+
+      <label for="valor_comercial">Valor Comercial (S/):</label>
+      <input type="number" id="valor_comercial" required>
+
+      <label for="anios">Plazo (años):</label>
+      <input type="number" id="anios" required>
+
+      <label for="tasa_nominal">Tasa Nominal (%):</label>
+      <input type="number" id="tasa_nominal" required>
+
+      <label for="capitalizacion">Capitalización:</label>
+      <select id="capitalizacion" required>
+        <option value="Mensual">Mensual</option>
+        <option value="Trimestral">Trimestral</option>
+        <option value="Semestral">Semestral</option>
+      </select>
+
+      <label for="frecuencia_pago">Frecuencia de Pago:</label>
+      <select id="frecuencia_pago" required>
+        <option value="Mensual">Mensual</option>
+        <option value="Trimestral">Trimestral</option>
+        <option value="Semestral">Semestral</option>
+      </select>
+
+      <label for="moneda">Moneda:</label>
+      <select id="moneda" required>
+        <option value="1">Soles (PEN)</option>
+        <option value="2">Dólares (USD)</option>
+      </select>
+
+      <label for="periodo_gracia">Periodo de Gracia:</label>
+      <select id="periodo_gracia" required>
+        <option value="1">Ninguno</option>
+        <option value="2">Solo Interés</option>
+        <option value="3">Total</option>
+      </select>
+
+      <button type="submit">Guardar Bono</button>
+    </form>
+    <p id="mensaje"></p>
+  </div>
+
+  <script src="formulario-bono.js"></script>
+</body>
+</html>
