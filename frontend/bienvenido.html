@@ -22,7 +22,7 @@
 <script>
   async function cargarBonos() {
       const nombre = localStorage.getItem('nombreUsuario');
-  const idUsuario = localStorage.getItem('idUsuario'); // <- Asegúrate de guardar esto en login.js
+  const idUsuario = localStorage.getItem('idUsuario');
 
   document.getElementById('saludo').textContent = nombre ? `Bienvenido, ${nombre}` : 'Bienvenido';
     const id = localStorage.getItem('idUsuario');
