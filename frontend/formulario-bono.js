@@ -40,7 +40,15 @@ document.getElementById('form-bono').addEventListener('submit', async (e) => {
     });
 
     const data = await res.json();
-    document.getElementById('mensaje').textContent = res.ok ? '✅ Bono guardado con éxito' : `❌ Error: ${data.error}`;
+    
+    if (res.ok) {
+      document.getElementById('mensaje').textContent = '✅ Bono guardado con éxito. Redirigiendo...';
+      setTimeout(() => {
+        window.location.href = 'flujo-caja.html';
+      }, 1000); // espera 1 segundo antes de redirigir
+    } else {
+      document.getElementById('mensaje').textContent = `❌ Error: ${data.error}`;
+    }
   } catch (err) {
     document.getElementById('mensaje').textContent = '❌ Error de conexión con el servidor';
     console.error(err);
