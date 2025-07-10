@@ -141,7 +141,7 @@ app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
     const result = await pool.request()
       .input('idUsuario', sql.Int, idUsuario)
       .query(`
-        SELECT TOP 1 valor_nominal, valor_comercial, anios, tasa_nominal, id_frecuencias
+        SELECT TOP 1 id, valor_nominal, valor_comercial, anios, tasa_nominal, id_frecuencias
         FROM BONOS
         WHERE id_usuario = @idUsuario
         ORDER BY id DESC
@@ -157,6 +157,59 @@ app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
     res.status(500).json({ error: 'Error del servidor' });
   }
 });
+
+app.post('/api/valoraciones', async (req, res) => {
+  try {
+    const {
+      id_bono,
+      precio_actual,
+      utilidad_perdida,
+      total_intereses,
+      total_amortizacion,
+      tcea_emisor,
+      tcea_bonista,
+      duracion,
+      duracion_modificada,
+      convexidad,
+    } = req.body;
+
+    const fecha_valoracion = new Date(); // Fecha actual
+
+    const pool = await poolPromise;
+    await pool.request()
+      .input('id_bono', sql.Int, id_bono)
+      .input('precio_actual', sql.Float, precio_actual)
+      .input('utilidad_perdida', sql.Float, utilidad_perdida)
+      .input('total_intereses', sql.Float, total_intereses)
+      .input('total_amortizacion', sql.Float, total_amortizacion)
+      .input('tcea_emisor', sql.Float, tcea_emisor)
+      .input('tcea_bonista', sql.Float, tcea_bonista)
+      .input('duracion', sql.Float, duracion)
+      .input('duracion_modificada', sql.Float, duracion_modificada)
+      .input('convexidad', sql.Float, convexidad)
+      .input('fecha_valoracion', sql.DateTime, fecha_valoracion)
+      .query(`
+        INSERT INTO VALORACIONES (
+          id_bono, precio_actual, utilidad_perdida,
+          total_intereses, total_amortizacion,
+          tcea_emisor, tcea_bonista,
+          duracion, duracion_modificada, convexidad, fecha_valoracion
+        ) VALUES (
+          @id_bono, @precio_actual, @utilidad_perdida,
+          @total_intereses, @total_amortizacion,
+          @tcea_emisor, @tcea_bonista,
+          @duracion, @duracion_modificada, @convexidad, @fecha_valoracion
+        )
+      `);
+
+    res.status(201).json({ mensaje: '✅ Valoración registrada correctamente' });
+
+  } catch (err) {
+    console.error('❌ Error al insertar valoración:', err.message);
+    res.status(500).json({ error: '❌ No se pudo insertar la valoración' });
+  }
+});
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 

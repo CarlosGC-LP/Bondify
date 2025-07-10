@@ -118,9 +118,56 @@ function renderizarTabla(flujos) {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const datos = await obtenerDatosBono();
+
     if (datos) {
+      console.log("ID del bono obtenido:", datos.id); // ✅ Para validar en consola
+
+      // ✅ Guarda el ID del bono en localStorage si lo necesitas después
+      localStorage.setItem('idBono', datos.id);
+
       const flujos = calcularFlujos(datos);
       renderizarTabla(flujos);
+
+      const idBono = localStorage.getItem('idBono');
+
+      if (!idBono) {
+        console.error("❌ No se encontró idBono en localStorage");
+        return;
+      }
+
+      // Cálculo simple de ejemplo (puedes reemplazar con tu lógica real)
+      const totalIntereses = flujos.reduce((sum, f) => sum + parseFloat(f.intereses), 0);
+      const totalAmortizacion = flujos.reduce((sum, f) => sum + parseFloat(f.amortizacion), 0);
+
+      const valoracion = {
+        id_bono: parseInt(idBono),
+        precio_actual: datos.valor_comercial, // ejemplo
+        utilidad_perdida: datos.valor_comercial - datos.valor_nominal, // ejemplo
+        total_intereses: totalIntereses,
+        total_amortizacion: totalAmortizacion,
+        tcea_emisor: 0.12, // puedes calcularlo después
+        tcea_bonista: 0.13, // puedes calcularlo después
+        duracion: 3.2, // ejemplo temporal
+        duracion_modificada: 2.9,
+        convexidad: 4.1,
+        fecha_valoracion: new Date().toISOString()
+      };
+
+      console.log("➡️ Enviando valoración:", valoracion);
+
+      const response = await fetch("http://localhost:3000/api/valoraciones", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(valoracion)
+      });
+
+      if (!response.ok) {
+        const errMsg = await response.text();
+        console.error("❌ Error al insertar valoración:", errMsg);
+      } else {
+        console.log("✅ Valoración guardada con éxito");
+      }
+
     } else {
       alert("No se encontró ningún bono");
     }
