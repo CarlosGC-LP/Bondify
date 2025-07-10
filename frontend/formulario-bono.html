@@ -2,57 +2,127 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registrar Bono</title>
-  <link rel="stylesheet" href="../styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuevo Bono Corporativo</title>
+  <link rel="stylesheet" href="formulario-bono.css" />
 </head>
 <body>
-  <div class="form-container">
-    <h2>Registrar Nuevo Bono</h2>
-    <form id="form-bono">
-      <label for="valor_nominal">Valor Nominal (S/):</label>
-      <input type="number" id="valor_nominal" required>
+  <section class="container">
+    <h2>Nuevo Bono Corporativo</h2>
+    <form id="bonoForm">
+      <div class="grid">
+        <div class="form-group">
+          <label>Valor Nominal</label>
+          <input type="number" name="valorNominal" required />
+        </div>
+        <div class="form-group">
+          <label>Valor Comercial</label>
+          <input type="number" name="valorComercial" required />
+        </div>
+        <div class="form-group">
+          <label>N° de Años</label>
+          <input type="number" name="anios" required />
+        </div>
+        <div class="form-group">
+          <label>Frecuencia del Cupón</label>
+          <select name="frecuenciaCupon" required>
+            <option value="">Seleccione</option>
+            <option value="MENSUAL">MENSUAL</option>
+            <option value="BIMESTRAL">BIMESTRAL</option>
+            <option value="TRIMESTRAL">TRIMESTRAL</option>
+            <option value="SEMESTRAL">SEMESTRAL</option>
+            <option value="ANUAL">ANUAL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Días por Año</label>
+          <select name="diasAnio" required>
+            <option value="">Seleccione</option>
+            <option value="360">360 días</option>
+            <option value="365">365 días</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Capitalización</label>
+          <select name="capitalizacion" required>
+            <option value="">Seleccione</option>
+            <option value="MENSUAL">MENSUAL</option>
+            <option value="BIMESTRAL">BIMESTRAL</option>
+            <option value="TRIMESTRAL">TRIMESTRAL</option>
+            <option value="CUATRIMESTRAL">CUATRIMESTRAL</option>
+            <option value="SEMESTRAL">SEMESTRAL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tasa de Interés (%)</label>
+          <input type="number" name="tasaInteres" step="0.0001" required />
+        </div>
+        <div class="form-group">
+          <label>Tasa Anual de Descuento (%)</label>
+          <input type="number" name="tasaDescuento" step="0.0001" required />
+        </div>
+        <div class="form-group">
+          <label>Impuesto a la Renta (%)</label>
+          <input type="number" name="impuestoRenta" step="0.0001" required />
+        </div>
+        <div class="form-group">
+          <label>Moneda</label>
+          <select name="moneda" required>
+            <option value="">Seleccione</option>
+            <option value="PEN">Soles</option>
+            <option value="USD">Dólares</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Periodo de Gracia</label>
+          <select name="periodoGracia" required>
+            <option value="">Seleccione</option>
+            <option value="NINGUNO">NINGUNO</option>
+            <option value="PARCIAL">PARCIAL</option>
+            <option value="TOTAL">TOTAL</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Gastos Iniciales (%)</label>
+          <input type="number" name="gastosIniciales" step="0.0001" required />
+        </div>
+        <div class="form-group">
+          <label>Fecha de Emisión</label>
+          <input type="date" name="fechaEmision" required />
+        </div>
+      </div>
 
-      <label for="valor_comercial">Valor Comercial (S/):</label>
-      <input type="number" id="valor_comercial" required>
-
-      <label for="anios">Plazo (años):</label>
-      <input type="number" id="anios" required>
-
-      <label for="tasa_nominal">Tasa Nominal (%):</label>
-      <input type="number" id="tasa_nominal" required>
-
-      <label for="capitalizacion">Capitalización:</label>
-      <select id="capitalizacion" required>
-        <option value="Mensual">Mensual</option>
-        <option value="Trimestral">Trimestral</option>
-        <option value="Semestral">Semestral</option>
-      </select>
-
-      <label for="frecuencia_pago">Frecuencia de Pago:</label>
-      <select id="frecuencia_pago" required>
-        <option value="Mensual">Mensual</option>
-        <option value="Trimestral">Trimestral</option>
-        <option value="Semestral">Semestral</option>
-      </select>
-
-      <label for="moneda">Moneda:</label>
-      <select id="moneda" required>
-        <option value="1">Soles (PEN)</option>
-        <option value="2">Dólares (USD)</option>
-      </select>
-
-      <label for="periodo_gracia">Periodo de Gracia:</label>
-      <select id="periodo_gracia" required>
-        <option value="1">Ninguno</option>
-        <option value="2">Solo Interés</option>
-        <option value="3">Total</option>
-      </select>
-
-      <button type="submit">Calcular</button>
+      <button type="submit">Calcular Flujo</button>
     </form>
-    <p id="mensaje"></p>
-  </div>
+  </section>
+
+  <section class="container" id="flujoSection" style="display: none;">
+    <h3>Flujo Obtenido</h3>
+    <table id="tablaFlujo">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Gracia</th>
+          <th>Saldo Inicial</th>
+          <th>Cuota</th>
+          <th>Interés</th>
+          <th>Amortización</th>
+          <th>Saldo Final</th>
+          <th>Flujo Emisor</th>
+          <th>Flujo Bonista</th>
+          <th>VP Flujo</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="container" id="resultadosSection" style="display: none;">
+    <h3>Resultados Obtenidos</h3>
+    <div id="resultados"></div>
+    <button id="guardarBtn">Guardar Valoración</button>
+  </section>
 
   <script src="formulario-bono.js"></script>
 </body>
