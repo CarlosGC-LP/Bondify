@@ -90,13 +90,23 @@ app.post('/api/login', async (req, res) => {
     const { correo, contrasena } = req.body;
     const pool = await poolPromise;
     const result = await pool.request()
-      .input('correo', sql.VarChar(50), correo)
-      .input('contrasena', sql.VarChar(50), contrasena)
-      .query('SELECT id, nombre FROM USUARIOS WHERE correo_electronico = @correo AND contrasenia = @contrasena');
+    .input('correo', sql.VarChar(50), correo)
+    .input('contrasena', sql.VarChar(50), contrasena)
+    .query(`
+      SELECT id, nombre, correo_electronico
+      FROM USUARIOS
+      WHERE correo_electronico = @correo AND contrasenia = @contrasena
+    `);
+
 
     if (result.recordset.length > 0) {
-      const { id, nombre } = result.recordset[0];
-      res.status(200).json({ mensaje: 'Login exitoso', nombre, id });
+      const { id, nombre, correo_electronico } = result.recordset[0];
+      res.status(200).json({
+        mensaje: 'Login exitoso',
+        nombre,
+        id,
+        correo: correo_electronico
+      });
     } else {
       res.status(401).json({ error: 'Credenciales incorrectas' });
     }

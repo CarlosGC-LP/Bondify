@@ -20,12 +20,20 @@
 
     <div class="card">
       <img src="https://raw.githubusercontent.com/diegooo01/HidraNet/refs/heads/main/public/12225881.png" alt="Foto de perfil" />
-      <h3>Hernan Morales</h3>
-      <p>hernan@example.com</p>
+      <h3></h3>
+      <p></p>
     </div>
 
     <button class="logout-btn">Cerrar sesión</button>
   </div>
+  <script>
+    const nombre = localStorage.getItem("nombreUsuario");
+    const correo = localStorage.getItem("correoUsuario");
+
+    document.querySelector(".card h3").textContent = nombre ?? "Usuario";
+    document.querySelector(".card p").textContent = correo ?? "Correo no disponible";
+  </script>
+
 </body>
 </html>
 <style>
