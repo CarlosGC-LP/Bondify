@@ -24,7 +24,7 @@
       <p></p>
     </div>
 
-    <button class="logout-btn">Cerrar sesión</button>
+    <button class="logout-btn" style="cursor: pointer;">Cerrar sesión</button>
   </div>
   <script>
     const nombre = localStorage.getItem("nombreUsuario");
@@ -32,6 +32,11 @@
 
     document.querySelector(".card h3").textContent = nombre ?? "Usuario";
     document.querySelector(".card p").textContent = correo ?? "Correo no disponible";
+
+    document.querySelector(".logout-btn").addEventListener("click", () => {
+    localStorage.clear(); 
+    window.location.href = "login.html"; 
+  });
   </script>
 
 </body>
