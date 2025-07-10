@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { sql, poolPromise } = require('./db');
 require('dotenv').config();
 
@@ -130,6 +131,34 @@ app.post('/api/bonos', async (req, res) => {
 
 });
 
+// Obtener el último bono del usuario
+app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
+  console.log('🟡 Ruta /api/bono-ultimo llamada con idUsuario =', req.params.idUsuario);
+  try {
+    const { idUsuario } = req.params;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('idUsuario', sql.Int, idUsuario)
+      .query(`
+        SELECT TOP 1 valor_nominal, valor_comercial, anios, tasa_nominal, id_frecuencias
+        FROM BONOS
+        WHERE id_usuario = @idUsuario
+        ORDER BY id DESC
+      `);
+
+    if (result.recordset.length > 0) {
+      res.json(result.recordset[0]);
+    } else {
+      res.status(404).json({ error: "No se encontraron bonos" });
+    }
+  } catch (err) {
+    console.error('Error obteniendo el bono:', err);
+    res.status(500).json({ error: 'Error del servidor' });
+  }
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
