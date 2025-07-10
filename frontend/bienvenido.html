@@ -12,7 +12,7 @@
   <div class="home-container">
     <div class="main-container">
       <div class="text-container">
-        <h2>Bienvenido a Bondify, XXXX!</h2>
+        <h2 id="saludo">Bienvenido a Bondify, XXXX!</h2>
         <hr />
       </div>
 
@@ -39,15 +39,16 @@
   
 <script>
   async function cargarBonos() {
-      const nombre = localStorage.getItem('nombreUsuario');
-  const idUsuario = localStorage.getItem('idUsuario');
+    const nombre = localStorage.getItem('nombreUsuario');
+    const idUsuario = localStorage.getItem('idUsuario');
 
-  document.getElementById('saludo').textContent = nombre ? `Bienvenido, ${nombre}` : 'Bienvenido';
-    const id = localStorage.getItem('idUsuario');
-    if (!id) return;
+    const saludo = document.getElementById('saludo');
+    saludo.textContent = nombre ? `Bienvenido a Bondify, ${nombre}!` : 'Bienvenido a Bondify';
+
+    if (!idUsuario) return;
 
     try {
-      const respuesta = await fetch(`http://localhost:3000/api/bonos/${id}`);
+      const respuesta = await fetch(`http://localhost:3000/api/bonos/${idUsuario}`);
       const bonos = await respuesta.json();
 
       if (!Array.isArray(bonos)) {
@@ -66,6 +67,7 @@
       console.error('Error cargando bonos:', err);
     }
   }
+
 
   window.onload = cargarBonos;
 
