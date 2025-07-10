@@ -44,7 +44,7 @@ app.post('/api/usuarios', async (req, res) => {
       .input('nombre', sql.VarChar(50), nombre)
       .input('correo', sql.VarChar(50), correo)
       .input('contrasenia', sql.VarChar(50), contrasena)
-      .query('INSERT INTO USUARIOS (nombre, correo_electronico, contrasenia) VALUES (@nombre, @correo, @contrasenia)');
+      .query('INSERT INTO usuarios (nombre, correo_electronico, contrasenia) VALUES (@nombre, @correo, @contrasenia)');
 
     res.status(201).json({ mensaje: '✅ Usuario registrado exitosamente' });
   } catch (err) {
