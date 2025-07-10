@@ -110,7 +110,6 @@ async function guardarBono() {
     const resultado = await respuesta.json();
     if (respuesta.ok) {
       alert('✅ Bono guardado correctamente.');
-      window.location.href = 'bienvenido.html';
     } else {
       alert(`❌ Error al guardar bono: ${resultado.error}`);
     }
