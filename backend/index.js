@@ -15,23 +15,54 @@ app.get('/', (req, res) => {
   res.send('✅ Backend conectado a SQL Server');
 });
 
-app.get('/api/bonos/:idUsuario', async (req, res) => {
+app.post('/api/bonos', async (req, res) => {
   try {
-    const { idUsuario } = req.params;
-    const pool = await poolPromise;
+    const {
+      id_usuario, id_frecuencias, id_capitalizacion,
+      id_moneda, id_tipos_tasa, id_periodos_gracia,
+      valor_nominal, valor_comercial, anios,
+      dias_anios, tasa_interes, tasa_descuento,
+      impuesto_renta, gastos_iniciales, fecha_bono
+    } = req.body;
 
-    const result = await pool.request()
-      .input('idUsuario', sql.Int, idUsuario)
+    const pool = await poolPromise;
+    await pool.request()
+      .input('id_usuario', sql.Int, id_usuario)
+      .input('id_frecuencias', sql.Int, id_frecuencias)
+      .input('id_capitalizacion', sql.Int, id_capitalizacion)
+      .input('id_moneda', sql.Int, id_moneda)
+      .input('id_tipos_tasa', sql.Int, id_tipos_tasa)
+      .input('id_periodos_gracia', sql.Int, id_periodos_gracia)
+      .input('valor_nominal', sql.Float, valor_nominal)
+      .input('valor_comercial', sql.Float, valor_comercial)
+      .input('anios', sql.Int, anios)
+      .input('dias_anios', sql.Int, dias_anios)
+      .input('tasa_interes', sql.Float, tasa_interes)
+      .input('tasa_descuento', sql.Float, tasa_descuento)
+      .input('impuesto_renta', sql.Float, impuesto_renta)
+      .input('gastos_iniciales', sql.Float, gastos_iniciales)
+      .input('fecha_bono', sql.DateTime, fecha_bono)
       .query(`
-        SELECT valor_nominal, anios, tasa_nominal
-        FROM BONOS
-        WHERE id_usuario = @idUsuario
+        INSERT INTO bonos (
+          id_usuario, id_frecuencias, id_capitalizacion,
+          id_moneda, id_tipos_tasa, id_periodos_gracia,
+          valor_nominal, valor_comercial, anios,
+          dias_anios, tasa_interes, tasa_descuento,
+          impuesto_renta, gastos_iniciales, fecha_bono
+        )
+        VALUES (
+          @id_usuario, @id_frecuencias, @id_capitalizacion,
+          @id_moneda, @id_tipos_tasa, @id_periodos_gracia,
+          @valor_nominal, @valor_comercial, @anios,
+          @dias_anios, @tasa_interes, @tasa_descuento,
+          @impuesto_renta, @gastos_iniciales, @fecha_bono
+        )
       `);
 
-    res.status(200).json(result.recordset); 
+    res.status(201).json({ mensaje: '✅ Bono guardado con éxito' });
   } catch (err) {
-    console.error('Error al obtener bonos:', err);
-    res.status(500).json({ error: 'Error al obtener bonos' });
+    console.error('❌ Error al guardar bono:', err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
