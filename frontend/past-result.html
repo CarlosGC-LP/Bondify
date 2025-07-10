@@ -37,14 +37,59 @@
       </div>
     </div>
   </div>
-  <script>
-    const backButton = document.querySelector(".back-button");
-    if (backButton) {
-      backButton.addEventListener("click", () => {
-        window.history.back(); // Vuelve a la página anterior
-      });
-    }
-  </script>
+<script>
+document.querySelector(".back-button")?.addEventListener("click", () => {
+  window.history.back();
+});
+
+// Cargar bonos del usuario
+document.addEventListener("DOMContentLoaded", async () => {
+  const idUsuario = localStorage.getItem("idUsuario");
+
+  if (!idUsuario) {
+    alert("⚠️ No hay sesión activa.");
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3000/api/bonos/usuario/${idUsuario}`);
+    const bonos = await res.json();
+
+    const container = document.querySelector(".result-container");
+
+    // Eliminar los bonos estáticos
+    document.querySelectorAll(".bono-card").forEach(el => el.remove());
+
+    // Agregar los bonos del usuario
+    bonos.forEach((bono, i) => {
+      const fecha = new Date(bono.fecha_bono);
+      const dia = String(fecha.getDate()).padStart(2, '0');
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+      const anio = fecha.getFullYear();
+      const fechaFormateada = `${dia}/${mes}/${anio}`;
+
+      const div = document.createElement("div");
+      div.className = "bono-card";
+      div.innerHTML = `
+        <div class="bono-info">
+          <strong>Bono ${String(i + 1).padStart(2, '0')}</strong><br>
+          Valor Nominal: S/. ${bono.valor_nominal.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+        </div>
+        <div class="bono-fecha">
+          Fecha: ${fechaFormateada}
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+  } catch (err) {
+    console.error("❌ Error al obtener bonos:", err);
+    alert("❌ Error al cargar el historial de bonos.");
+  }
+});
+
+</script>
+
 </body>
 </html>
 <style>

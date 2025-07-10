@@ -199,6 +199,30 @@ app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
   }
 });
 
+app.get('/api/bonos/usuario/:idUsuario', async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('idUsuario', sql.Int, idUsuario)
+      .query(`
+        SELECT 
+          id,
+          valor_nominal,
+          fecha_bono
+        FROM bonos
+        WHERE id_usuario = @idUsuario
+        ORDER BY id ASC
+      `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('❌ Error al obtener bonos del usuario:', err.message);
+    res.status(500).json({ error: 'Error al obtener bonos del usuario' });
+  }
+});
+
 app.post('/api/valoraciones', async (req, res) => {
   try {
     const {
