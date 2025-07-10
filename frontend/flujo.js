@@ -10,7 +10,8 @@ async function obtenerDatosBono() {
 
 // Cálculo de TES
 function calcularTES(j, m) {
-  return Math.pow(1 + j / m, 1) - 1;
+  const jDecimal = j / 100; // Conversión de porcentaje a decimal
+  return Math.pow(1 + jDecimal / m, 1) - 1;
 }
 
 function sumarMeses(fecha, meses) {
@@ -19,17 +20,45 @@ function sumarMeses(fecha, meses) {
   return nuevaFecha;
 }
 
+function obtenerFrecuencia(id) {
+  switch (id) {
+    case 1: return 12; // mensual
+    case 2: return 4;  // trimestral
+    case 3: return 2;  // semestral
+    case 4: return 1;  // anual
+    default: return 1; // por si acaso
+  }
+}
+
 function calcularFlujos(datos) {
+  const FRECUENCIA_PAGOS_POR_ANIO = {
+    1: 12, // Mensual
+    2: 4,  // Trimestral
+    3: 2,  // Semestral
+    4: 1   // Anual
+  };
+
+  const FRECUENCIA_MESES = {
+    1: 1,  // Mensual
+    2: 3,  // Trimestral
+    3: 6,  // Semestral
+    4: 12  // Anual
+  };
+
+  const frecuencia = FRECUENCIA_PAGOS_POR_ANIO[datos.id_frecuencias] || 1;
+  const mesesEntrePagos = FRECUENCIA_MESES[datos.id_frecuencias] || 1;
+
   const VN = datos.valor_nominal;
   const VC = datos.valor_comercial;
-  const N = datos.anios * datos.id_frecuencias;
-  const TES = calcularTES(datos.tasa_nominal, datos.id_frecuencias);
+  const N = datos.anios * frecuencia;
+  const TES = calcularTES(datos.tasa_nominal, frecuencia);
   const amortizacion = VN / N;
 
   const flujos = [];
   let saldo = VN;
-  const fechaInicio = new Date(); // actual
+  const fechaInicio = new Date(); // fecha actual
 
+  // Periodo 0: emisión
   flujos.push({
     periodo: 0,
     fecha_pago: fechaInicio.toLocaleDateString(),
@@ -41,6 +70,7 @@ function calcularFlujos(datos) {
     flujo_bonista: VC.toFixed(2)
   });
 
+  // Periodos 1 hasta N
   for (let t = 1; t <= N; t++) {
     const interes = saldo * TES;
     const cuota = amortizacion + interes;
@@ -48,7 +78,7 @@ function calcularFlujos(datos) {
 
     flujos.push({
       periodo: t,
-      fecha_pago: sumarMeses(fechaInicio, t * (12 / datos.id_frecuencias)).toLocaleDateString(),
+      fecha_pago: sumarMeses(fechaInicio, mesesEntrePagos * t).toLocaleDateString(),
       bono_indexa: bonoIndexado.toFixed(2),
       intereses: interes.toFixed(2),
       amortizacion: amortizacion.toFixed(2),
