@@ -3,23 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <title>Iniciar Sesión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Bhai+2:wght@400..800&family=Cambay:ital,wght@0,400;0,700;1,400;1,700&family=Kaisei+Tokumin&family=Lexend:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
   <div class="form-container">
-    <h2>Iniciar Sesión</h2>
+    <h2>¡Bienvenido a Bondify!</h2>
     <form id="form-login">
       <label for="correo">Correo electrónico:</label>
-      <input type="email" id="correo" required>
+      <input placeholder="Ingresa correo electrónico" type="email" id="correo" required>
 
       <label for="contrasena">Contraseña:</label>
-      <input type="password" id="contrasena" required>
+      <input placeholder="Ingresa contraseña" type="password" id="contrasena" required>
 
-      <button type="submit">Ingresar</button>
+      <button type="submit">Iniciar sesión</button>
     </form>
     <p id="respuesta"></p>
+    <div class="link-to">
+      <a href="">¿No tienes una cuenta? Regístrate</a>
+    </div>
   </div>
 
   <script src="login.js"></script>
 </body>
 </html>
+<style>
+  *{
+    margin: 0;
+    padding: 0;
+  }
+  body{
+    background-color: #2D638C;
+    font-family: "Lexend", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  form input{
+    font-family: "Lexend", sans-serif;
+    width: calc(100% - 25px);
+  }
+
+  .form-container{
+    h2, label{
+      color: #2D638C
+    }
+  }
+
+  form button{
+    background-color: #2D638C;
+    font-family: "Lexend", sans-serif;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .link-to{
+    display: flex;
+    justify-content: center;
+    a{
+      color: #2D638C;
+      margin-bottom: 10px;
+    }
+  }
+
+</style>
