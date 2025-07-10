@@ -135,6 +135,12 @@
       window.location.href = 'flujo-caja.html';
     });
 
+    const backButton = document.querySelector(".back-button");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        window.history.back(); // Vuelve a la página anterior
+      });
+    }
   </script>
   <script src="result.js"></script>
 </body>

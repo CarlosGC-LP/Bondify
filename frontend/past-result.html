@@ -37,6 +37,14 @@
       </div>
     </div>
   </div>
+  <script>
+    const backButton = document.querySelector(".back-button");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        window.history.back(); // Vuelve a la página anterior
+      });
+    }
+  </script>
 </body>
 </html>
 <style>

@@ -33,12 +33,20 @@
     document.querySelector(".card h3").textContent = nombre ?? "Usuario";
     document.querySelector(".card p").textContent = correo ?? "Correo no disponible";
 
+    // Cerrar sesión
     document.querySelector(".logout-btn").addEventListener("click", () => {
-    localStorage.clear(); 
-    window.location.href = "login.html"; 
-  });
-  </script>
+      localStorage.clear();
+      window.location.href = "login.html";
+    });
 
+    // Botón de volver
+    const backButton = document.querySelector(".back-button");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        window.history.back();
+      });
+    }
+  </script>
 </body>
 </html>
 <style>
