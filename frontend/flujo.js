@@ -1,177 +1,136 @@
-// Función para obtener datos del último bono registrado
-async function obtenerDatosBono() {
-  const idUsuario = localStorage.getItem('idUsuario');
-  if (!idUsuario) return null;
-
-  const res = await fetch(`http://localhost:3000/api/bono-ultimo/${idUsuario}`);
-  if (!res.ok) throw new Error('No se pudo obtener el bono');
-  return await res.json();
-}
-
-// Cálculo de TES
-function calcularTES(j, m) {
-  const jDecimal = j / 100; // Conversión de porcentaje a decimal
-  return Math.pow(1 + jDecimal / m, 1) - 1;
-}
-
-function sumarMeses(fecha, meses) {
-  const nuevaFecha = new Date(fecha);
-  nuevaFecha.setMonth(nuevaFecha.getMonth() + meses);
-  return nuevaFecha;
-}
-
-function obtenerFrecuencia(id) {
-  switch (id) {
-    case 1: return 12; // mensual
-    case 2: return 4;  // trimestral
-    case 3: return 2;  // semestral
-    case 4: return 1;  // anual
-    default: return 1; // por si acaso
-  }
-}
-
-function calcularFlujos(datos) {
-  const FRECUENCIA_PAGOS_POR_ANIO = {
-    1: 12, // Mensual
-    2: 4,  // Trimestral
-    3: 2,  // Semestral
-    4: 1   // Anual
+function tasaPeriodica(tea, frecuenciaTexto) {
+  const frecuencias = {
+    MENSUAL: 12,
+    BIMESTRAL: 6,
+    TRIMESTRAL: 4,
+    SEMESTRAL: 2,
+    ANUAL: 1
   };
 
-  const FRECUENCIA_MESES = {
-    1: 1,  // Mensual
-    2: 3,  // Trimestral
-    3: 6,  // Semestral
-    4: 12  // Anual
-  };
+  const clave = frecuenciaTexto.toUpperCase();
+  if (!(clave in frecuencias)) throw new Error("Frecuencia no válida");
 
-  const frecuencia = FRECUENCIA_PAGOS_POR_ANIO[datos.id_frecuencias] || 1;
-  const mesesEntrePagos = FRECUENCIA_MESES[datos.id_frecuencias] || 1;
+  const m = frecuencias[clave];
+  return Math.pow(1 + tea, 1 / m) - 1;
+}
 
-  const VN = datos.valor_nominal;
-  const VC = datos.valor_comercial;
-  const N = datos.anios * frecuencia;
-  const TES = calcularTES(datos.tasa_nominal, frecuencia);
-  const amortizacion = VN / N;
+document.addEventListener("DOMContentLoaded", async () => {
+  const idUsuario = localStorage.getItem("idUsuario");
+  if (!idUsuario) return alert("⚠️ No hay sesión activa.");
 
-  const flujos = [];
-  let saldo = VN;
-  const fechaInicio = new Date(); // fecha actual
+  const tabla = document.querySelector("#tablaFlujo tbody");
 
-  // Periodo 0: emisión
-  flujos.push({
-    periodo: 0,
-    fecha_pago: fechaInicio.toLocaleDateString(),
-    bono_indexa: VN.toFixed(2),
-    intereses: "0.00",
-    amortizacion: "0.00",
-    cuota: "0.00",
-    flujo_emisor: (-1 * VC).toFixed(2),
-    flujo_bonista: VC.toFixed(2)
-  });
+  try {
+    const res = await fetch(`http://localhost:3000/api/bono-ultimo/${idUsuario}`);
+    const bono = await res.json();
+    console.log("🟡 Bono cargado:", bono);
 
-  // Periodos 1 hasta N
-  for (let t = 1; t <= N; t++) {
-    const interes = saldo * TES;
-    const cuota = amortizacion + interes;
-    const bonoIndexado = saldo;
+    const frecuenciaTexto = {
+      1: "MENSUAL",
+      2: "BIMESTRAL",
+      3: "TRIMESTRAL",
+      4: "SEMESTRAL",
+      5: "ANUAL"
+    }[bono.id_frecuencias];
 
-    flujos.push({
-      periodo: t,
-      fecha_pago: sumarMeses(fechaInicio, mesesEntrePagos * t).toLocaleDateString(),
-      bono_indexa: bonoIndexado.toFixed(2),
-      intereses: interes.toFixed(2),
-      amortizacion: amortizacion.toFixed(2),
-      cuota: cuota.toFixed(2),
-      flujo_emisor: (-1 * cuota).toFixed(2),
-      flujo_bonista: cuota.toFixed(2)
+    const diasPorPeriodo = {
+      MENSUAL: 30,
+      BIMESTRAL: 60,
+      TRIMESTRAL: 90,
+      SEMESTRAL: 180,
+      ANUAL: 360
+    }[frecuenciaTexto];
+
+    const VN = bono.valor_nominal;
+    const VC = bono.valor_comercial;
+    const nAnios = bono.anios;
+    const TEA = parseFloat(bono.tasa_interes);
+
+    if (isNaN(TEA)) throw new Error("La tasa de interés no es válida");
+
+    const tasaPeriodo = tasaPeriodica(TEA / 100, frecuenciaTexto);
+    const nPeriodos = Math.round((360 / diasPorPeriodo) * nAnios);
+    const amortizacion = VN / nPeriodos;
+    let saldoInicial = VN;
+    let fecha = new Date(bono.fecha_bono);
+    tabla.innerHTML = "";
+
+    // Acumuladores
+    let totalIntereses = 0;
+    let totalAmortizacion = 0;
+    let vpFlujosTotales = 0;
+    let sumaDuracion = 0;
+    let sumaDuracionMod = 0;
+    let sumaConvexidad = 0;
+
+    for (let i = 1; i <= nPeriodos; i++) {
+      const interes = saldoInicial * tasaPeriodo;
+      const cuota = interes + amortizacion;
+      const saldoFinal = saldoInicial - amortizacion;
+      const flujoBonista = cuota;
+      const vpFlujo = flujoBonista / Math.pow(1 + tasaPeriodo, i);
+
+      // Indicadores
+      totalIntereses += interes;
+      totalAmortizacion += amortizacion;
+      vpFlujosTotales += vpFlujo;
+      sumaDuracion += i * vpFlujo;
+      sumaDuracionMod += (i / (1 + tasaPeriodo)) * vpFlujo;
+      sumaConvexidad += i * (i + 1) * vpFlujo;
+
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${i}</td>
+        <td>${fecha.toLocaleDateString("es-PE")}</td>
+        <td>SIN GRACIA</td>
+        <td>${saldoInicial.toFixed(2)}</td>
+        <td>${cuota.toFixed(2)}</td>
+        <td>${interes.toFixed(2)}</td>
+        <td>${amortizacion.toFixed(2)}</td>
+        <td>${saldoFinal.toFixed(2)}</td>
+        <td>${(-cuota).toFixed(2)}</td>
+        <td>${flujoBonista.toFixed(2)}</td>
+        <td>${vpFlujo.toFixed(2)}</td>
+      `;
+      tabla.appendChild(fila);
+
+      saldoInicial = saldoFinal;
+      fecha.setDate(fecha.getDate() + diasPorPeriodo);
+    }
+
+    const duracion = sumaDuracion / vpFlujosTotales;
+    const duracionMod = sumaDuracionMod / vpFlujosTotales;
+    const convexidad = sumaConvexidad / (vpFlujosTotales * Math.pow(1 + tasaPeriodo, 2));
+    const tceaBonista = Math.pow(VN / VC, 1 / nPeriodos) - 1;
+
+    // Guardar valoración
+    const dataValoracion = {
+      id_bono: bono.id,
+      precio_actual: VC,
+      utilidad_perdida: VN - VC,
+      total_intereses: totalIntereses,
+      total_amortizacion: totalAmortizacion,
+      tcea_emisor: 0,
+      tcea_bonista: tceaBonista * 100,
+      duracion: duracion,
+      duracion_modificada: duracionMod,
+      convexidad: convexidad
+    };
+
+    const respuesta = await fetch("http://localhost:3000/api/valoraciones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(dataValoracion)
     });
 
-    saldo -= amortizacion;
-  }
-
-  return flujos;
-}
-
-function renderizarTabla(flujos) {
-  const tbody = document.querySelector("#tablaFlujo tbody");
-  tbody.innerHTML = "";
-
-  flujos.forEach(f => {
-    const fila = `
-      <tr>
-        <td>${f.periodo}</td>
-        <td>${f.fecha_pago}</td>
-        <td>${f.bono_indexa}</td>
-        <td>${f.intereses}</td>
-        <td>${f.amortizacion}</td>
-        <td>${f.cuota}</td>
-        <td>${f.flujo_emisor}</td>
-        <td>${f.flujo_bonista}</td>
-      </tr>
-    `;
-    tbody.insertAdjacentHTML("beforeend", fila);
-  });
-}
-
-// Cargar datos al inicio
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    const datos = await obtenerDatosBono();
-
-    if (datos) {
-      console.log("ID del bono obtenido:", datos.id); // ✅ Para validar en consola
-
-      // ✅ Guarda el ID del bono en localStorage si lo necesitas después
-      localStorage.setItem('idBono', datos.id);
-
-      const flujos = calcularFlujos(datos);
-      renderizarTabla(flujos);
-
-      const idBono = localStorage.getItem('idBono');
-
-      if (!idBono) {
-        console.error("❌ No se encontró idBono en localStorage");
-        return;
-      }
-
-      // Cálculo simple de ejemplo (puedes reemplazar con tu lógica real)
-      const totalIntereses = flujos.reduce((sum, f) => sum + parseFloat(f.intereses), 0);
-      const totalAmortizacion = flujos.reduce((sum, f) => sum + parseFloat(f.amortizacion), 0);
-
-      const valoracion = {
-        id_bono: parseInt(idBono),
-        precio_actual: datos.valor_comercial, // ejemplo
-        utilidad_perdida: datos.valor_comercial - datos.valor_nominal, // ejemplo
-        total_intereses: totalIntereses,
-        total_amortizacion: totalAmortizacion,
-        tcea_emisor: 0.12, // puedes calcularlo después
-        tcea_bonista: 0.13, // puedes calcularlo después
-        duracion: 3.2, // ejemplo temporal
-        duracion_modificada: 2.9,
-        convexidad: 4.1,
-        fecha_valoracion: new Date().toISOString()
-      };
-
-      console.log("➡️ Enviando valoración:", valoracion);
-
-      const response = await fetch("http://localhost:3000/api/valoraciones", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(valoracion)
-      });
-
-      if (!response.ok) {
-        const errMsg = await response.text();
-        console.error("❌ Error al insertar valoración:", errMsg);
-      } else {
-        console.log("✅ Valoración guardada con éxito");
-      }
-
+    if (respuesta.ok) {
+      console.log("✅ Valoración registrada correctamente.");
     } else {
-      alert("No se encontró ningún bono");
+      console.error("❌ Error al registrar valoración");
     }
+
   } catch (err) {
-    console.error("Error cargando datos del bono:", err);
+    console.error("❌ Error al cargar flujo:", err);
+    alert("❌ Error al generar el flujo de caja.");
   }
 });

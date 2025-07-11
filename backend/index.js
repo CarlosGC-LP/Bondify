@@ -174,7 +174,6 @@ app.post('/api/bonos', async (req, res) => {
 
 // Obtener el último bono del usuario
 app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
-  console.log('🟡 Ruta /api/bono-ultimo llamada con idUsuario =', req.params.idUsuario);
   try {
     const { idUsuario } = req.params;
     const pool = await poolPromise;
@@ -182,7 +181,9 @@ app.get('/api/bono-ultimo/:idUsuario', async (req, res) => {
     const result = await pool.request()
       .input('idUsuario', sql.Int, idUsuario)
       .query(`
-        SELECT TOP 1 id, valor_nominal, valor_comercial, anios, tasa_nominal, id_frecuencias
+        SELECT TOP 1 
+          id, valor_nominal, valor_comercial, anios, tasa_interes, 
+          id_frecuencias, fecha_bono
         FROM BONOS
         WHERE id_usuario = @idUsuario
         ORDER BY id DESC
@@ -238,7 +239,7 @@ app.post('/api/valoraciones', async (req, res) => {
       convexidad,
     } = req.body;
 
-    const fecha_valoracion = new Date(); // Fecha actual
+    const fecha_valoracion = new Date();
 
     const pool = await poolPromise;
     await pool.request()
@@ -274,7 +275,6 @@ app.post('/api/valoraciones', async (req, res) => {
     res.status(500).json({ error: '❌ No se pudo insertar la valoración' });
   }
 });
-
 
 app.use(express.static(path.join(__dirname, 'public')));
 
