@@ -33,6 +33,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       5: "ANUAL"
     }[bono.id_frecuencias];
 
+    if (!frecuenciaTexto) throw new Error("Frecuencia no reconocida");
+
     const diasPorPeriodo = {
       MENSUAL: 30,
       BIMESTRAL: 60,
@@ -48,35 +50,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (isNaN(TEA)) throw new Error("La tasa de interés no es válida");
 
-    const tasaPeriodo = tasaPeriodica(TEA / 100, frecuenciaTexto);
-    const nPeriodos = Math.round((360 / diasPorPeriodo) * nAnios);
+    const tasaEfectiva = tasaPeriodica(TEA / 100, frecuenciaTexto);
+    const nPeriodos = nAnios * (360 / diasPorPeriodo);
     const amortizacion = VN / nPeriodos;
+
     let saldoInicial = VN;
     let fecha = new Date(bono.fecha_bono);
-    tabla.innerHTML = "";
 
-    // Acumuladores
-    let totalIntereses = 0;
-    let totalAmortizacion = 0;
+    tabla.innerHTML = "";
     let vpFlujosTotales = 0;
-    let sumaDuracion = 0;
-    let sumaDuracionMod = 0;
-    let sumaConvexidad = 0;
+    let total_intereses = 0;
+    let total_amortizacion = 0;
+
+    const flujos = [];
 
     for (let i = 1; i <= nPeriodos; i++) {
-      const interes = saldoInicial * tasaPeriodo;
+      const interes = saldoInicial * tasaEfectiva;
       const cuota = interes + amortizacion;
       const saldoFinal = saldoInicial - amortizacion;
+      const flujoEmisor = -cuota;
       const flujoBonista = cuota;
-      const vpFlujo = flujoBonista / Math.pow(1 + tasaPeriodo, i);
+      const vpFlujo = flujoBonista / Math.pow(1 + tasaEfectiva, i);
 
-      // Indicadores
-      totalIntereses += interes;
-      totalAmortizacion += amortizacion;
+      total_intereses += interes;
+      total_amortizacion += amortizacion;
       vpFlujosTotales += vpFlujo;
-      sumaDuracion += i * vpFlujo;
-      sumaDuracionMod += (i / (1 + tasaPeriodo)) * vpFlujo;
-      sumaConvexidad += i * (i + 1) * vpFlujo;
+
+      flujos.push({ flujo: flujoBonista, periodo: i });
 
       const fila = document.createElement("tr");
       fila.innerHTML = `
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <td>${interes.toFixed(2)}</td>
         <td>${amortizacion.toFixed(2)}</td>
         <td>${saldoFinal.toFixed(2)}</td>
-        <td>${(-cuota).toFixed(2)}</td>
+        <td>${flujoEmisor.toFixed(2)}</td>
         <td>${flujoBonista.toFixed(2)}</td>
         <td>${vpFlujo.toFixed(2)}</td>
       `;
@@ -98,39 +98,102 @@ document.addEventListener("DOMContentLoaded", async () => {
       fecha.setDate(fecha.getDate() + diasPorPeriodo);
     }
 
-    const duracion = sumaDuracion / vpFlujosTotales;
-    const duracionMod = sumaDuracionMod / vpFlujosTotales;
-    const convexidad = sumaConvexidad / (vpFlujosTotales * Math.pow(1 + tasaPeriodo, 2));
-    const tceaBonista = Math.pow(VN / VC, 1 / nPeriodos) - 1;
+    // ▶️ Cálculos adicionales
+    const VAN = vpFlujosTotales - VC;
+    const utilidadPerdida = vpFlujosTotales - VC;
+    const TCEA = (vpFlujosTotales / VC - 1) * 100;
+    const TREA = TCEA;
+    const TIR = ((vpFlujosTotales / VN) ** (1 / nPeriodos) - 1) * 100;
 
-    // Guardar valoración
-    const dataValoracion = {
-      id_bono: bono.id,
-      precio_actual: VC,
-      utilidad_perdida: VN - VC,
-      total_intereses: totalIntereses,
-      total_amortizacion: totalAmortizacion,
-      tcea_emisor: 0,
-      tcea_bonista: tceaBonista * 100,
-      duracion: duracion,
-      duracion_modificada: duracionMod,
-      convexidad: convexidad
-    };
+    let duracion = 0;
+    let duracionMod = 0;
+    let convexidad = 0;
 
-    const respuesta = await fetch("http://localhost:3000/api/valoraciones", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(dataValoracion)
+    const denominador = vpFlujosTotales;
+    flujos.forEach(({ flujo, periodo }) => {
+      const vp = flujo / Math.pow(1 + tasaEfectiva, periodo);
+      duracion += periodo * vp;
+      convexidad += periodo * (periodo + 1) * vp;
     });
 
-    if (respuesta.ok) {
-      console.log("✅ Valoración registrada correctamente.");
-    } else {
-      console.error("❌ Error al registrar valoración");
-    }
+    duracion = duracion / denominador;
+    duracionMod = duracion / (1 + tasaEfectiva);
+    convexidad = convexidad / (denominador * Math.pow(1 + tasaEfectiva, 2));
+
+    // ▶️ Mostrar resultados
+    const contenedorResultados = document.createElement("div");
+    contenedorResultados.innerHTML = `
+      <h3>Resultados Obtenidos</h3>
+      <p>TCEA (Emisor): ${TCEA.toFixed(4)}%</p>
+      <p>TREA (Inversionista): ${TREA.toFixed(4)}%</p>
+      <p>TIR: ${TIR.toFixed(4)}%</p>
+      <p>VAN: ${VAN.toFixed(2)}</p>
+      <p>Duración: ${duracion.toFixed(4)}</p>
+      <p>Duración Modificada: ${duracionMod.toFixed(4)}</p>
+      <p>Convexidad: ${convexidad.toFixed(4)}</p>
+      <p>Precio Máximo: ${(VC + utilidadPerdida).toFixed(2)}</p>
+    `;
+    document.querySelector(".container").appendChild(contenedorResultados);
+
+    // ▶️ Guardar en BD
+    await guardarValoracion({
+      id_bono: bono.id,
+      precio_actual: VC,
+      utilidad_perdida: utilidadPerdida,
+      total_intereses,
+      total_amortizacion,
+      tcea_emisor: TCEA,
+      tcea_bonista: TREA,
+      duracion,
+      duracion_modificada: duracionMod,
+      convexidad
+    });
 
   } catch (err) {
     console.error("❌ Error al cargar flujo:", err);
     alert("❌ Error al generar el flujo de caja.");
   }
 });
+
+// ✅ Función para guardar valoración
+async function guardarValoracion({
+  id_bono,
+  precio_actual,
+  utilidad_perdida,
+  total_intereses,
+  total_amortizacion,
+  tcea_emisor,
+  tcea_bonista,
+  duracion,
+  duracion_modificada,
+  convexidad
+}) {
+  try {
+    const respuesta = await fetch("http://localhost:3000/api/valoraciones", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id_bono,
+        precio_actual,
+        utilidad_perdida,
+        total_intereses,
+        total_amortizacion,
+        tcea_emisor,
+        tcea_bonista,
+        duracion,
+        duracion_modificada,
+        convexidad
+      })
+    });
+
+    const data = await respuesta.json();
+    if (!respuesta.ok) {
+      console.error("❌ Error al guardar valoración:", data.error);
+      alert("❌ No se pudo guardar la valoración.");
+    } else {
+      console.log("✅ Valoración guardada correctamente.");
+    }
+  } catch (err) {
+    console.error("❌ Error al enviar valoración:", err);
+  }
+}

@@ -50,3 +50,27 @@ thead {
   font-size: 16px;
   cursor: pointer;
 }
+
+.resultados-container {
+  margin-top: 3rem;
+  padding: 1rem;
+  background-color: #f0f4f8;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.resultados-container h3 {
+  color: #2D638C;
+  margin-bottom: 1rem;
+}
+
+.resultados-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.resultados-container li {
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+
