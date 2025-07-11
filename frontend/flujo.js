@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       fecha.setDate(fecha.getDate() + diasPorPeriodo);
     }
 
-    // ▶️ Cálculos adicionales
+    // Cálculos adicionales
     const VAN = vpFlujosTotales - VC;
     const utilidadPerdida = vpFlujosTotales - VC;
     const TCEA = (vpFlujosTotales / VC - 1) * 100;
@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     duracionMod = duracion / (1 + tasaEfectiva);
     convexidad = convexidad / (denominador * Math.pow(1 + tasaEfectiva, 2));
 
-    // ▶️ Mostrar resultados
+    // Mostrar resultados
     const contenedorResultados = document.createElement("div");
     contenedorResultados.innerHTML = `
       <h3>Resultados Obtenidos</h3>
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
     document.querySelector(".container").appendChild(contenedorResultados);
 
-    // ▶️ Guardar en BD
+    // Guardar en BD
     await guardarValoracion({
       id_bono: bono.id,
       precio_actual: VC,
@@ -155,7 +155,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ✅ Función para guardar valoración
+// Función para guardar valoración
 async function guardarValoracion({
   id_bono,
   precio_actual,

@@ -14,7 +14,6 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     const data = await respuesta.json();
 
     if (respuesta.ok) {
-      // Guardar nombre del usuario en localStorage
       localStorage.setItem('nombreUsuario', data.nombre);
       localStorage.setItem('idUsuario', data.id); 
       localStorage.setItem('correoUsuario', data.correo);

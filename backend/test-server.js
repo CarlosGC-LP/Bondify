@@ -1,7 +1,7 @@
 // backend/test-server.js
 const express = require('express');
 const cors = require('cors');
-const { sql, poolPromise } = require('./db'); // Usa tu archivo db.js
+const { sql, poolPromise } = require('./db'); 
 require('dotenv').config();
 
 const app = express();
